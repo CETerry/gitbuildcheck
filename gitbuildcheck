@@ -1,41 +1,49 @@
-from bvulist import bvulist
-import pytest
+#!/usr/bin/env python3
+import sys
+import requests
 
-@pytest.fixture
-def newList():
-    L = bvulist()
-    L.append(1)
-    L.append(2)
-    L.append(3)
+user=""
+shame = ""
+urlStart = "https://github.com/"
+urlEnd = "/actions/workflows/python-app.yml/badge.svg"
 
-    yield L
-
-@pytest.fixture
-def emptyList():
-    L = bvulist()
-
-    yield L
-
-def test_prepend(newList):
-    newList.prepend(0)
-    assert newList[0] == 0 and len(newList) == 4
-
-def test_pop_back(newList):
-    x = newList.pop_back()
-    assert newList[:] == [1,2] and x == 3
-
-def test_pop_front(newList):
-    x = newList.pop_front()
-    assert newList[:] == [2,3] and x == 1
-
-    
-def test_pop_back_empty(emptyList):
-    with pytest.raises(IndexError):
-        emptyList.pop_back()
+def runSiren():
 
 
-def test_pop_front_empty(emptyList):
-    with pytest.raises(IndexError):
-        emptyList.pop_front()
+if len(sys.argv) == 2 or len(sys.argv) == 3:
+    print("USAGE: gitBuildCheck <--shame> <username/repo>")
+    print("OR")
+    print("USAGE: gitBuildCheck <username/repo> <--shame>")
 
-    
+if len(sys.argv) == 2:
+    user = sys.argv[1]
+
+if len(sys.argv) == 3:
+    if sys.argv[1] == "--shame":
+        shame = sys.argv[1]
+        user = sys.argv[2]
+    elif sys.argv[2] == "--shame":
+        shame = sys.argv[2]
+        user = sys.argv[1]
+
+
+urlStart += user
+urlStart += urlEnd
+
+
+r = requests.get(urlStart)
+
+if r.status_code == 200:
+    if "passing" in r.text:
+        print("0")
+        exit(0)
+
+    if "failing" in r.text:
+        if shame != "":
+            pass
+            #Run siren
+        print("1")
+        exit(1)
+
+else:
+    print("Either the username or repository was malformed")
